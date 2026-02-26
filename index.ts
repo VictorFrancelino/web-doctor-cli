@@ -3,7 +3,8 @@
 import { cac } from "cac";
 import pc from "picocolors";
 import { scanDirectory } from "./src/scanner";
-import analyzeCss from "./src/analyzeCss";
+import parseToAst from "./src/css/parseToAst";
+import calcPoints from "./src/css/calcPoints";
 
 const cli = cac("web-doctor");
 
@@ -26,8 +27,9 @@ cli
 			console.log(pc.green(`Found ${files.length} files for analysis:`));
 			files.forEach(async f => {
 				if (f.endsWith(".css")) {
-					const cssAst = await analyzeCss(f);
-					console.log(cssAst)
+					const cssAst = await parseToAst(f);
+					const resultPointsCss = calcPoints(cssAst);
+					console.log(resultPointsCss)
 				}
 			});
 
