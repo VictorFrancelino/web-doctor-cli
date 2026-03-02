@@ -8,6 +8,11 @@ async function parseCssToAst(path: string): Promise<AstItem[]> {
 	const astCssItems: AstItem[] = [];
 
 	ast.walkRules(rule => {
+		if (
+			rule.parent?.type === 'atrule' &&
+			rule.parent.name === 'keyframes'
+		) return;
+
 		const properties: PropertiesItem[] = [];
 
 		let selector = rule.selector;

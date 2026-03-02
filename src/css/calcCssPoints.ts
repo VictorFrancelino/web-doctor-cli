@@ -7,16 +7,25 @@ function calcCssPoints(cssAst: AstItem[]): number {
 		const selectorHasNoProperties = item.properties.length < 1;
 		if (selectorHasNoProperties) points -= 1;
 
-		const hasIdSelector = item.selector.includes("#");
+		const hasIdSelector = /#\w+/.test(item.selector);
 		if (hasIdSelector) points -= 1;
 
-		const selectors = item.selector.match(/\S+/g) || [];
-		if (selectors.length >= 5) points -= 1;
+		const selectors = item.selector.split(',');
+		for (let selector of selectors) {
+			const cleanSelector = selector.trim();
+			const result = cleanSelector.match(/\S+/g) || [];
+			if (result.length >= 5) {
+				points--;
+				break;
+			}
+		}
 
 		if (item.selector === "*") {
 			const hasHeavyProperty = item.properties.some(declaration => isNotLayoutProperty(declaration.property));
 			if (hasHeavyProperty) points -= 1;
 		}
+
+		if (isOverqualifiedSelector(item.selector)) points--;
 
 		if (points <= 0) return 0;
 
@@ -51,8 +60,10 @@ function colorValueHasLiteralName(value: string) {
 	const isRgb = value.startsWith("rgb");
 	const isHsl = value.startsWith("hsl");
 	const isTransparent = value === "transparent";
+	const isCurrentColor = value === 'currentColor';
+	const isInherit = value === 'inherit';
 
-	return !isHex && !isVar && !isRgb && !isHsl && !isTransparent;
+	return !isHex && !isVar && !isRgb && !isHsl && !isTransparent && !isCurrentColor && !isInherit;
 }
 
 function isNotLayoutProperty(property: string) {
@@ -75,7 +86,11 @@ function hasExcessiveZIndex(value: string) {
 }
 
 function isPixelBasedFont(value: string) {
-	return value.includes("px");
+	return !value.startsWith('var') && value.includes("px");
+}
+
+function isOverqualifiedSelector(value: string) {
+	return /(^|\s)[a-zA-Z0-9]+[\.#]/.test(value);
 }
 
 export default calcCssPoints;
