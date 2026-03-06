@@ -17,7 +17,7 @@ function calcJsPoints(astNode: any) {
 			break;
 		case 'CallExpression':
 			const funcName = node.callee?.name;
-			if (funcName === 'alert' || funcName === 'eval') points--;
+			if (funcName === 'alert' || funcName === 'eval') points -= 2;
 			break;
 		case 'BinaryExpression':
 			const hasDoubleEqualExpression = node.operator === '==' || node.operator === '!=';
