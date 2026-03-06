@@ -33,32 +33,31 @@ cli
 				return;
 			}
 
-			console.log(pc.green(`Found ${files.length} files for analysis.`));
-			console.log(pc.yellow("\nAnalyzing health rules..."));
+			console.log(pc.green(`Found ${files.length} files for analysis.\n`));
+			console.log(pc.yellow("Analyzing health rules...\n"));
 
 			let totalPoints = 0;
 			let successfulFiles = 0;
 
 			const analysisPromises = files.map(async (f) => {
 				try {
-					let points = 0;
-					let icon = '';
+					let logs, points: number = 0, icon = '';
 
 					if (f.endsWith('.html')) {
 						const dom = await parseHtmlToDom(f);
-						points = calcHtmlPoints(dom);
+						[points, logs] = calcHtmlPoints(dom);
 						icon = '🧱';
 					} else if (f.endsWith('.css')) {
 						const ast = await parseCssToAst(f);
-						points = calcCssPoints(ast);
+						[points, logs] = calcCssPoints(ast);
 						icon = '🎨';
 					} else if (f.endsWith('.js')) {
 						const ast = await parseJsToAst(f);
-						points = calcJsPoints(ast);
+						[points, logs] = calcJsPoints(ast);
 						icon = '📄';
 					}
 
-					return { file: f, icon, points };
+					return { file: f, logs, icon, points };
 				} catch (e) {
 					console.log(pc.red(`❌ Failed to diagnose file: ${f}`));
 					return null;
@@ -74,6 +73,12 @@ cli
 					console.log(
 						`${pc.cyan(`${result.icon} ${result.file}`)} -> ${formatPoints(result.points)}`
 					);
+
+					if (result.logs && result.logs.length > 0) {
+						for (let log of result.logs) {
+							console.log(pc.red(`${log.title}: ${log.msg}`));
+						}
+					}
 				}
 			}
 
