@@ -1,0 +1,11 @@
+export { default as imgRules } from "./img";
+export { default as labelRules } from "./label";
+export { default as htmlRules } from "./html";
+export { default as linkRules } from "./link";
+export { default as buttonRules } from "./button";
+export { default as inputRules } from "./inputs";
+export { default as badTags } from "./badTags";
+export { default as inlineJs } from "./inlineJs";
+export { default as inlineCss } from "./inlineCss";
+export { default as tabIndexRule } from "./tabIndex";
+export { default as seoRules } from "./seoRules";
