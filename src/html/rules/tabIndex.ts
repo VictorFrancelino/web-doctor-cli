@@ -3,22 +3,14 @@ import type { DomItem } from "../types";
 import { addErrorLog } from "../../logs";
 import { getAttr } from "../utils";
 
-function tabIndexRule(
-	currentTag: DomItem,
-	points: number,
-	logs: DiagnosticLog[]
-): number {
+function tabIndexRule(currentTag: DomItem, logs: DiagnosticLog[]) {
 	const tabIndexValue = getAttr(currentTag, 'tabindex');
 	if (tabIndexValue !== undefined && Number(tabIndexValue) > 0) {
-		points--;
-
 		addErrorLog(logs,{
 			title: 'Positive TabIndex',
 			msg: 'Avoid tabindex > 0. It breaks natural keyboard navigation. Use 0 or -1.'
 		});
 	}
-
-	return points;
 }
 
 export default tabIndexRule;

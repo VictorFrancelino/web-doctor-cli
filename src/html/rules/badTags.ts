@@ -14,21 +14,13 @@ const BAD_TAGS = new Set([
 	'frame'
 ]);
 
-function badTags(
-	currentTag: DomItem,
-	points: number,
-	logs: DiagnosticLog[]
-): number {
+function badTags(currentTag: DomItem, logs: DiagnosticLog[]) {
 	if (BAD_TAGS.has(currentTag.tag)) {
-		points--;
-
 		addErrorLog(logs, {
 			title: `Obsolete tag detected`,
 			msg: `Tag <${currentTag.tag}> is deprecated. Use CSS for styling or semantic HTML5 tags.`
 		});
 	}
-
-	return points;
 }
 
 export default badTags;

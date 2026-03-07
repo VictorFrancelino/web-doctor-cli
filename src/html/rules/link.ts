@@ -11,11 +11,7 @@ const GENERIC_LINK_TEXTS = new Set([
 	'read more'
 ]);
 
-function linkRules(
-	currentTag: DomItem,
-	points: number,
-	logs: DiagnosticLog[]
-): number {
+function linkRules(currentTag: DomItem, logs: DiagnosticLog[]) {
 	let hasHref = hasValidAttr(currentTag, 'href');
 	let isTargetBlank = getAttr(currentTag, 'target') === '_blank';
 
@@ -25,17 +21,13 @@ function linkRules(
 	const hasAriaLabel = hasValidAttr(currentTag, 'aria-label');
 
 	if (!hasHref) {
-		points--;
-
 		addErrorLog(logs, {
 			title: 'Missing \'href\' attribute',
-			msg: 'Links (<a>) must have an \'href\'.Use<button> for JS clicks.'
+			msg: 'Links (<a>) must have an \'href\'. Use <button> for JS clicks.'
 		});
 	}
 
 	if (isTargetBlank && !hasSecureRel) {
-		points--;
-
 		addErrorLog(logs, {
 			title: 'Unsafe target="_blank"',
 			msg: 'Add rel="noopener noreferrer" to prevent security vulnerabilities.'
@@ -47,16 +39,11 @@ function linkRules(
 	const isEmpty = linkText === '';
 
 	if ((isGenericText || isEmpty) && !hasAriaLabel) {
-		points--;
-
 		addErrorLog(logs, {
 			title: 'Poor Link Text',
 			msg: 'Avoid generic text like \'click here\' or empty links. Use descriptive text or an \'aria-label\'.'
 		});
 	}
-
-
-	return points;
 }
 
 export default linkRules;
