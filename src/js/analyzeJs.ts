@@ -1,5 +1,13 @@
 import getChildren from "./getChildren";
-import { type DiagnosticLog, addErrorLog } from "../logs";
+import type { DiagnosticLog } from "../logs";
+import {
+	assignmentExpressionRules,
+	binaryExpressionRules,
+	blockStatementRules,
+	callExpressionRules,
+	variableDeclarationRules,
+	withStatementRules
+} from './rules';
 
 function analyzeJs(astNode: any): DiagnosticLog[] {
 	const logs: DiagnosticLog[] = [];
@@ -8,65 +16,30 @@ function analyzeJs(astNode: any): DiagnosticLog[] {
 		if (!node) return;
 
 		switch (node.type) {
-		case 'AssignmentExpression':
-			const hasInnerHtml = node.left?.property?.name === 'innerHTML';
-			if (hasInnerHtml) {
-				addErrorLog(logs, {
-					title: 'Usage of innerHTML',
-					msg: `Avoid 'innerHTML' due to Cross-Site Scripting (XSS) risks. Use 'textContent' or direct DOM manipulation.`
-				});
+			case 'AssignmentExpression': {
+				assignmentExpressionRules(node, logs);
+				break;
 			}
-
-			break;
-		case 'VariableDeclaration':
-			const hasVar = node.kind === 'var';
-			if (hasVar) {
-				addErrorLog(logs, {
-					title: `Usage of 'var'`,
-					msg: `Avoid 'var'. Use 'const' for constants or 'let' for reassignable variables to prevent scope bugs.`
-				});
+			case 'BinaryExpression': {
+				binaryExpressionRules(node, logs);
+				break;
 			}
-
-			break;
-		case 'CallExpression':
-			const funcName = node.callee?.name;
-			if (funcName === 'alert' || funcName === 'eval') {
-				addErrorLog(logs, {
-					title: `Usage of ${funcName}()`,
-					msg: funcName === 'eval'
-            ? `Never use 'eval()'. It is a severe security vulnerability.`
-            : `Avoid 'alert()'. It blocks the main thread and ruins the User Experience.`
-				});
+			case 'BlockStatement': {
+				blockStatementRules(node, logs);
+				break;
 			}
-
-			break;
-		case 'BinaryExpression':
-			const hasDoubleEqualExpression = node.operator === '==' || node.operator === '!=';
-			if (hasDoubleEqualExpression) {
-				addErrorLog(logs, {
-					title: 'Loose Equality Operator',
-					msg: `Avoid '${node.operator}'. Always use strict equality ('===' or '!==') to prevent type coercion bugs.`
-				});
+			case 'CallExpression': {
+				callExpressionRules(node, logs);
+				break;
 			}
-
-			break;
-		case 'WithStatement':
-			addErrorLog(logs, {
-				title: `Usage of 'with' Statement`,
-				msg: `Never use the 'with' statement. It creates unpredictable scopes and is forbidden in Strict Mode.`
-			});
-
-			break;
-		case 'BlockStatement':
-			const hasNoCodeInBlock = node.body.length === 0
-			if (hasNoCodeInBlock) {
-				addErrorLog(logs, {
-					title: 'Empty Block Statement',
-					msg: `Remove empty blocks (e.g., empty 'if' or 'function') to keep the code clean and maintainable.`
-				});
+			case 'VariableDeclaration': {
+				variableDeclarationRules(node, logs);
+				break;
 			}
-
-			break;
+			case 'WithStatement': {
+				withStatementRules(logs);
+				break;
+			}
 		}
 
 		const children = getChildren(node);
