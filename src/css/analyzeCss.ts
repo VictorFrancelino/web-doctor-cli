@@ -1,64 +1,25 @@
 import type { AstItem } from "./types";
 import { type DiagnosticLog, addErrorLog } from "../logs";
+import hasNoProperties from "./rules/hasNoProperties";
+import hasIdSelector from "./rules/hasIdSelector";
+import deeplyNestedSelector from "./rules/deeplyNestedSelector";
+import hasHeavyProperty from "./rules/hasHeavyProperty";
+import isOverqualifiedSelector from "./rules/isOverqualifiedSelector";
+import hasIsImportantFlag from "./rules/hasIsImportantFlag";
+import colorValueHasLiteralName from "./rules/colorValueHasLiteralName";
 
 function analyzeCss(cssAst: AstItem[]): DiagnosticLog[] {
 	const logs: DiagnosticLog[] = [];
 
 	for (let item of cssAst) {
-		const selectorHasNoProperties = item.properties.length < 1;
-		if (selectorHasNoProperties) {
-			addErrorLog(logs, {
-				title: 'Empty CSS Rule',
-				msg: `Remove empty selectors like '${item.selector}' to reduce file size.`
-			});
-		}
-
-		const hasIdSelector = /#\w+/.test(item.selector);
-		if (hasIdSelector) {
-			addErrorLog(logs, {
-				title: 'ID Selector Used',
-				msg: `Avoid styling with IDs (like '${item.selector}'). Use classes (.) for better reusability and lower specificity.`
-			});
-		}
-
-		const selectors = item.selector.split(',');
-		for (let selector of selectors) {
-			const cleanSelector = selector.trim();
-			const result = cleanSelector.match(/\S+/g) || [];
-			if (result.length >= 5) {
-				addErrorLog(logs, {
-					title: 'Deeply Nested Selector',
-					msg: 'Avoid nesting selectors more than 4 levels deep. It hurts render performance and maintainability.'
-				});
-
-				break;
-			}
-		}
-
-		if (item.selector === "*") {
-			const hasHeavyProperty = item.properties.some(declaration => isNotLayoutProperty(declaration.property));
-			if (hasHeavyProperty) {
-				addErrorLog(logs, {
-					title: 'Heavy Universal Selector',
-					msg: `Avoid expensive properties on the '*' selector. Limit it to layout resets (margin, padding, box-sizing).`
-				});
-			}
-		}
-
-		if (isOverqualifiedSelector(item.selector)) {
-			addErrorLog(logs, {
-				title: 'Overqualified Selector',
-				msg: `Avoid attaching tags to classes (e.g., 'div.btn'). Use just the class ('.btn') to keep specificity low.`
-			});
-		}
+		hasNoProperties(item, logs);
+		hasIdSelector(item, logs);
+		deeplyNestedSelector(item, logs);
+		hasHeavyProperty(item, logs);
+		isOverqualifiedSelector(item, logs);
 
 		for (let declaration of item.properties) {
-			if (declaration.isImportant) {
-				addErrorLog(logs, {
-					title: 'Usage of !important',
-					msg: `Avoid '!important' on '${declaration.property}'. It breaks the natural cascade of CSS.`
-				});
-			}
+			hasIsImportantFlag(declaration, logs);
 
 			switch (declaration.property) {
 				case "outline":
@@ -100,26 +61,6 @@ function analyzeCss(cssAst: AstItem[]): DiagnosticLog[] {
 	return logs;
 }
 
-function colorValueHasLiteralName(value: string) {
-	const isHex = value.startsWith("#");
-	const isVar = value.startsWith("var");
-	const isRgb = value.startsWith("rgb");
-	const isHsl = value.startsWith("hsl");
-	const isTransparent = value === "transparent";
-	const isCurrentColor = value === 'currentColor';
-	const isInherit = value === 'inherit';
-
-	return !isHex && !isVar && !isRgb && !isHsl && !isTransparent && !isCurrentColor && !isInherit;
-}
-
-function isNotLayoutProperty(property: string) {
-	const isMargin = property === "margin";
-	const isPadding = property === "padding";
-	const isBoxSizing = property === "box-sizing";
-
-	return !isMargin && !isPadding && !isBoxSizing;
-}
-
 function outlineValueHasNoneOrZero(value: string) {
 	const isNone = value === "none";
 	const isZero = value === "0";
@@ -133,10 +74,6 @@ function hasExcessiveZIndex(value: string) {
 
 function isPixelBasedFont(value: string) {
 	return !value.startsWith('var') && value.includes("px");
-}
-
-function isOverqualifiedSelector(value: string) {
-	return /(^|\s)[a-zA-Z0-9]+[\.#]/.test(value);
 }
 
 export default analyzeCss;
