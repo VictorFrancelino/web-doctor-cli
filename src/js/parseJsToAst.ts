@@ -1,8 +1,8 @@
-import * as acorn from "acorn";
+import { parse } from "meriyah";
 
 async function parseJsToAst(path: string) {
 	const code = await Bun.file(path).text();
-	return acorn.parse(code, { ecmaVersion: "latest" });
+	return parse(code, { next: true, module: true });
 }
 
 export default parseJsToAst;
