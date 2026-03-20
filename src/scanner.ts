@@ -1,30 +1,18 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+const glob = new Bun.Glob('**/*.{html,css,js}');
+const ignore = ['node_modules', '.git', 'dist', 'build'];
 
-const TARGET_EXTENSIONS = ['.html', '.css', '.js'];
-const IGNORED_DIRS = new Set(['node_modules', '.git', 'dist', 'build']);
+export async function scanDirectory(dir: string): Promise<string[]> {
+	const files: string[] = [];
 
-export async function scanDirectory(dir: string) {
-	const filesFound: string[] = [];
-
-	async function recursiveScan(currentPath: string) {
-		const entries = await readdir(currentPath, { withFileTypes: true });
-
-		for (const entry of entries) {
-			if (IGNORED_DIRS.has(entry.name)) continue;
-
-			const fullPath = join(currentPath, entry.name);
-
-			if (entry.isDirectory()) await recursiveScan(fullPath);
-			else if (entry.isFile()) {
-				const isTarget = TARGET_EXTENSIONS.some(
-					ext => entry.name.endsWith(ext)
-				);
-				if (isTarget) filesFound.push(fullPath);
-			}
-		}
+	for await (const file of glob.scan({
+		cwd: dir,
+		absolute: true,
+		followSymlinks: false,
+		onlyFiles: true,
+	})) {
+		const parts = file.split('/');
+		if (!parts.some(part => ignore.includes(part))) files.push(file);
 	}
 
-	await recursiveScan(dir);
-	return filesFound;
+	return files;
 }
