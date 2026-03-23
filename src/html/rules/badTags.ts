@@ -3,15 +3,22 @@ import type { DomItem } from "../types";
 import { addLog, DiagnosticLevel } from "../../logs";
 
 const BAD_TAGS = new Set([
-	'center',
-	'font',
-	'marquee',
+	'acronym',
+	'applet',
 	'b',
+	'basefont',
+	'big',
 	'blink',
+	'center',
+	'dir',
+	'font',
+	'frame',
+	'frameset',
 	'i',
-	'br',
+	'marquee',
+	'noframes',
 	'strike',
-	'frame'
+	'tt'
 ]);
 
 function badTags(currentTag: DomItem, logs: DiagnosticLog[]) {
