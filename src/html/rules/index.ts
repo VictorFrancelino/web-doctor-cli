@@ -9,3 +9,4 @@ export { default as badTags } from "./badTags";
 export { default as inlineJs } from "./inlineJs";
 export { default as inlineCss } from "./inlineCss";
 export { default as tabIndexRule } from "./tabIndex";
+export { default as bodyRules } from "./body";

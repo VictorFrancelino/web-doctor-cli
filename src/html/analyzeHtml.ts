@@ -11,7 +11,8 @@ import {
 	labelRules,
 	inputRules,
 	buttonRules,
-	linkRules
+	linkRules,
+	bodyRules
 } from './rules';
 
 function analyzeHtml(dom: DomItem[]): DiagnosticLog[] {
@@ -24,34 +25,30 @@ function analyzeHtml(dom: DomItem[]): DiagnosticLog[] {
 		tabIndexRule(currentTag, logs);
 
 		switch (currentTag.tag) {
-			case 'html': {
+			case 'html':
 				htmlRules(currentTag, logs);
 				break;
-			}
-			case 'head': {
+			case 'body':
+				bodyRules(currentTag, logs);
+				break;
+			case 'head':
 				headRules(currentTag, logs);
 				break;
-			}
-			case 'img': {
+			case 'img':
 				imgRules(currentTag, logs);
 				break;
-			}
-			case 'label': {
+			case 'label':
 				labelRules(currentTag, logs);
         break;
-			}
-			case 'input': {
+			case 'input':
 				inputRules(currentTag, logs);
         break;
-			}
-			case 'button': {
+			case 'button':
 				buttonRules(currentTag, logs);
         break;
-			}
-			case 'a': {
+			case 'a':
 				linkRules(currentTag, logs);
         break;
-			}
 		}
   }
 
