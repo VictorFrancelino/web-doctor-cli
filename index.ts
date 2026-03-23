@@ -46,17 +46,18 @@ cli
 			const analysisPromises = files.map(async (f) => {
 				try {
 					let logs, icon = "";
+					const fullPath = `${targetDir}/${f}`;
 
 					if (f.endsWith(".html")) {
-						const dom = await parseHtmlToDom(f);
+						const dom = await parseHtmlToDom(fullPath);
 						logs = analyzeHtml(dom);
 						icon = "🧱";
 					} else if (f.endsWith(".css")) {
-						const ast = await parseCssToAst(f);
+						const ast = await parseCssToAst(fullPath);
 						logs = analyzeCss(ast);
 						icon = "🎨";
 					} else if (f.endsWith(".js")) {
-						const ast = await parseJsToAst(f);
+						const ast = await parseJsToAst(fullPath);
 						logs = analyzeJs(ast);
 						icon = "📄";
 					}
